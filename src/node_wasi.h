@@ -74,6 +74,7 @@ class WASI : public BaseObject,
   static void SockRecv(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void SockSend(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void SockShutdown(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void SockAccept(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   static void _SetMemory(const v8::FunctionCallbackInfo<v8::Value>& args);
 

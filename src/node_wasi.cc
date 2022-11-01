@@ -1637,6 +1637,38 @@ void WASI::SockShutdown(const FunctionCallbackInfo<Value>& args) {
 }
 
 
+void WASI::SockAccept(const FunctionCallbackInfo<Value>& args) {
+  WASI* wasi;
+  uint32_t sock;
+  uint32_t flags;
+  uint32_t fd_ptr;
+  char* memory;
+  size_t mem_size;
+  RETURN_IF_BAD_ARG_COUNT(args, 3);
+  CHECK_TO_TYPE_OR_RETURN(args, args[0], Uint32, sock);
+  CHECK_TO_TYPE_OR_RETURN(args, args[1], Uint32, flags);
+  CHECK_TO_TYPE_OR_RETURN(args, args[2], Uint32, fd_ptr);
+  ASSIGN_INITIALIZED_OR_RETURN_UNWRAP(&wasi, args.This());
+  Debug(wasi,
+        "sock_accept(%d, %d, %d)\n",
+        sock,
+        flags,
+        fd_ptr);
+  GET_BACKING_STORE_OR_RETURN(wasi, args, &memory, &mem_size);
+  CHECK_BOUNDS_OR_RETURN(args, mem_size, fd_ptr, UVWASI_SERDES_SIZE_fd_t);
+
+  uvwasi_fd_t fd;
+  uvwasi_errno_t err =  uvwasi_sock_accept(&wasi->uvw_,
+                                           sock,
+                                           flags,
+                                           &fd);
+
+  if (err == UVWASI_ESUCCESS)
+    uvwasi_serdes_write_size_t(memory, fd_ptr, fd);
+
+  args.GetReturnValue().Set(err);
+}
+
 void WASI::_SetMemory(const FunctionCallbackInfo<Value>& args) {
   WASI* wasi;
   ASSIGN_OR_RETURN_UNWRAP(&wasi, args.This());
@@ -1723,6 +1755,7 @@ static void Initialize(Local<Object> target,
   SetProtoMethod(isolate, tmpl, "sock_recv", WASI::SockRecv);
   SetProtoMethod(isolate, tmpl, "sock_send", WASI::SockSend);
   SetProtoMethod(isolate, tmpl, "sock_shutdown", WASI::SockShutdown);
+  SetProtoMethod(isolate, tmpl, "sock_accept", WASI::SockAccept);
 
   SetInstanceMethod(isolate, tmpl, "_setMemory", WASI::_SetMemory);
 
