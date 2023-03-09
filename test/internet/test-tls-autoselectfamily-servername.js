@@ -32,6 +32,7 @@ setDefaultAutoSelectFamilyAttemptTimeout(common.platformTimeout(common.isWindows
     port: 443,
     servername: INET_HOST,
     autoSelectFamily: true,
+    autoSelectFamily: true,
   });
 
   socket.on('secureConnect', common.mustCall(() => socket.end()));
